@@ -23,15 +23,18 @@ class RNNBlock(nn.Module):
     def __init__(self, rnn_layers, activation):
         super().__init__()
 
-        self.rnn_layers = nn.ModuleList()
-        self.bn_layers = nn.ModuleList()
-        self.activations = nn.ModuleList()
+        self.rnn_layers = []
+        self.bn_layers = []
+        self.activations = []
         for i in range(len(rnn_layers)):
             self.rnn_layers.append(rnn_layers[i])
             self.bn_layers.append(nn.BatchNorm1d(
                 rnn_layers[i].hidden_size * (2 if self.rnn_layers[0].bidirectional else 1)
             ))
             self.activations.append(eval(activation))
+        self.rnn_layers = nn.ModuleList(self.rnn_layers)
+        self.bn_layers = nn.ModuleList(self.bn_layers)
+        self.activations = nn.ModuleList(self.activations)
 
     def forward(self, specs):
         hidden_state = torch.zeros(
