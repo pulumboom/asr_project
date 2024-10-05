@@ -25,11 +25,15 @@ class LibrispeechDataset(BaseDataset):
     def __init__(self, part, data_dir=None, *args, **kwargs):
         assert part in URL_LINKS or part == "train_all"
 
+
         if data_dir is None:
             data_dir = ROOT_PATH / "data" / "datasets" / "librispeech"
             data_dir.mkdir(exist_ok=True, parents=True)
+            self._index_dir = data_dir
         else:
             data_dir = ROOT_PATH.parent.parent / data_dir
+            self._index_dir = ROOT_PATH / "data" / "index"
+            self._index_dir.mkdir(exist_ok=True, parents=True)
         self._data_dir = data_dir
         if part == "train_all":
             index = sum(
@@ -56,7 +60,7 @@ class LibrispeechDataset(BaseDataset):
         shutil.rmtree(str(self._data_dir / "LibriSpeech"))
 
     def _get_or_load_index(self, part):
-        index_path = self._data_dir / f"{part}_index.json"
+        index_path = self._index_dir / f"{part}_index.json"
         if index_path.exists():
             with index_path.open() as f:
                 index = json.load(f)
