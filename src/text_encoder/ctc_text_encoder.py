@@ -75,6 +75,7 @@ class CTCTextEncoder:
             ("", self.EMPTY_TOK): 0.0
         }
         for log_prob in log_probs:
+            log_prob = log_prob.cpu().detach().numpy()
             dp = self._expand_and_merge_path(dp, log_prob)
             dp = self._truncate_paths(dp, beam_size)
         max_prob_prefix = max(dp.items(), key=lambda x: x[1])[0]
