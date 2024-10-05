@@ -46,7 +46,7 @@ class RNNBlock(nn.Module):
             self.rnn_layers[0].hidden_size,
         ).to(self.device)
         for i in range(len(self.rnn_layers)):
-            specs, _ = self.rnn_layers[i](specs, hidden_state)
+            specs, hidden_state = self.rnn_layers[i](specs, hidden_state)
             specs = self.bn_layers[i](specs.transpose(-1, -2)).transpose(-1, -2)
             specs = self.activations[i](specs)
 
@@ -75,5 +75,5 @@ class DeepSpeechV2(nn.Module):
         specs = self.fc(specs)
         log_probs = log_softmax(specs, dim=-1)
         batch["log_probs"] = log_probs
-        batch["log_probs_length"] = batch["spectrogram_length"]
+        batch["log_probs_length"] = torch.tensor([log_probs.shape[-2]] * log_probs.shape[0])
         return batch
