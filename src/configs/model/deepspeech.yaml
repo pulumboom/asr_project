@@ -62,3 +62,4 @@ rnn_layers:
     bidirectional: True
     batch_first: True
 activation: torch.nn.ReLU()
+device: auto

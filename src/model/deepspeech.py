@@ -20,7 +20,7 @@ class ConvBlock(nn.Module):
 
 
 class RNNBlock(nn.Module):
-    def __init__(self, rnn_layers, activation):
+    def __init__(self, rnn_layers, activation, device):
         super().__init__()
 
         self.rnn_layers = []
@@ -35,14 +35,14 @@ class RNNBlock(nn.Module):
         self.rnn_layers = nn.ModuleList(self.rnn_layers)
         self.bn_layers = nn.ModuleList(self.bn_layers)
         self.activations = nn.ModuleList(self.activations)
+        self.device = device
 
     def forward(self, specs):
         hidden_state = torch.zeros(
             self.rnn_layers[0].num_layers * (2 if self.rnn_layers[0].bidirectional else 1),
             specs.shape[0],
             self.rnn_layers[0].hidden_size,
-        )
-        print(hidden_state.device)
+        ).to(self.device)
         for i in range(len(self.rnn_layers)):
             specs, _ = self.rnn_layers[i](specs, hidden_state)
             specs = self.bn_layers[i](specs.transpose(-1, -2)).transpose(-1, -2)
@@ -58,11 +58,11 @@ class DeepSpeechV2(nn.Module):
             rnn_layers: list[nn.Module],
             activation: nn.Module,
             n_tokens: int,
-
+            device
     ):
         super().__init__()
         self.cnn_layers = ConvBlock(cnn_layers, activation)
-        self.rnn_layers = RNNBlock(rnn_layers, activation)
+        self.rnn_layers = RNNBlock(rnn_layers, activation, device)
         self.fc = nn.Linear(rnn_layers[-1].hidden_size * (2 if rnn_layers[-1].bidirectional else 1), n_tokens)
 
     def forward(self, **batch):
