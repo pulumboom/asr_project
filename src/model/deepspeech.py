@@ -23,9 +23,9 @@ class RNNBlock(nn.Module):
     def __init__(self, rnn_layers, activation):
         super().__init__()
 
-        self.rnn_layers = []
-        self.bn_layers = []
-        self.activations = []
+        self.rnn_layers = nn.ModuleList()
+        self.bn_layers = nn.ModuleList()
+        self.activations = nn.ModuleList()
         for i in range(len(rnn_layers)):
             self.rnn_layers.append(rnn_layers[i])
             self.bn_layers.append(nn.BatchNorm1d(
