@@ -1,9 +1,10 @@
 import re
 from string import ascii_lowercase
+from collections import defaultdict
 
 import torch
+import numpy as np
 
-# TODO add CTC decode
 # TODO add BPE, LM, Beam Search support
 # Note: think about metrics and encoder
 # The design can be remarkably improved
@@ -59,7 +60,40 @@ class CTCTextEncoder:
         return "".join([self.ind2char[int(ind)] for ind in inds]).strip()
 
     def ctc_decode(self, inds) -> str:
-        pass  # TODO
+        decoded = []
+        last_char = self.EMPTY_TOK
+        for ind in inds:
+            if self.ind2char[ind] == last_char:
+                continue
+            if self.ind2char[ind] != self.EMPTY_TOK:
+                decoded.append(self.ind2char[ind])
+            last_char = self.ind2char[ind]
+        return ''.join(decoded)
+
+    def ctc_beam_search(self, log_probs, beam_size=20):
+        dp = {
+            ("", self.EMPTY_TOK): 0.0
+        }
+        for log_prob in log_probs:
+            dp = self._expand_and_merge_path(dp, log_prob)
+            dp = self._truncate_paths(dp, beam_size)
+        max_prob_prefix = max(dp.items(), key=lambda x: x[1])[0]
+        return max_prob_prefix
+
+    def _expand_and_merge_path(self, dp, log_prob):
+        new_dp = defaultdict(float)
+        for ind, next_token_prob in enumerate(log_prob):
+            cur_char = self.ind2char[ind]
+            for (prefix, last_char), v in dp.items():
+                if last_char == cur_char or cur_char == self.EMPTY_TOK:
+                    new_prefix = prefix
+                else:
+                    new_prefix += cur_char
+                new_dp[(new_prefix, cur_char)] = np.log(np.exp(new_dp[(new_prefix, cur_char)]) + np.exp(v + log_prob))
+        return new_dp
+
+    def _truncate_paths(self, dp, beam_size):
+        return dict(sorted(list(dp.items()), key=lambda x: -x[1])[:beam_size])
 
     @staticmethod
     def normalize_text(text: str):

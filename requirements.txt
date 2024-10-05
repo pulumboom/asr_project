@@ -4,9 +4,9 @@ torchaudio==2.2.0
 soundfile
 numpy==1.26.4
 torch_audiomentations
-tqdm
-matplotlib
-pandas
+tqdm~=4.66.5
+matplotlib~=3.9.2
+pandas~=2.2.3
 wandb
 comet_ml
 hydra-core
@@ -14,3 +14,7 @@ hydra-core
 black
 isort
 pre-commit
+
+omegaconf~=2.3.0
+pillow~=10.4.0
+editdistance~=0.8.1

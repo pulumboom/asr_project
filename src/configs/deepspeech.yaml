@@ -1,7 +1,7 @@
 defaults:
-  - model: baseline
+  - model: deepspeech
   - writer: wandb
-  - metrics: example
+  - metrics: deepspeech_idiot_beam_search_testing
   - datasets: example
   - dataloader: example
   - transforms: example_only_instance

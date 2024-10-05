@@ -1,0 +1,64 @@
+_target_: src.model.DeepSpeechV2
+cnn_layers:
+        - _target_: torch.nn.Conv2d
+          in_channels: 1
+          out_channels: 32
+          kernel_size: [41, 11]
+          stride: [2, 2]
+          padding: [20, 5]
+        - _target_: torch.nn.Conv2d
+          in_channels: 32
+          out_channels: 32
+          kernel_size: [21, 11]
+          stride: [2, 2]
+          padding: [10, 5]
+        - _target_: torch.nn.Conv2d
+          in_channels: 32
+          out_channels: 96
+          kernel_size: [21, 11]
+          stride: [2, 1]
+          padding: [10, 5]
+rnn_layers:
+  - _target_: torch.nn.GRU
+    input_size: 1536
+    hidden_size: 4096
+    num_layers: 5
+    bidirectional: True
+    batch_first: True
+  - _target_: torch.nn.GRU
+    input_size: 8192
+    hidden_size: 4096
+    num_layers: 5
+    bidirectional: True
+    batch_first: True
+  - _target_: torch.nn.GRU
+    input_size: 8192
+    hidden_size: 4096
+    num_layers: 5
+    bidirectional: True
+    batch_first: True
+  - _target_: torch.nn.GRU
+    input_size: 8192
+    hidden_size: 4096
+    num_layers: 5
+    bidirectional: True
+    batch_first: True
+  - _target_: torch.nn.GRU
+    input_size: 8192
+    hidden_size: 4096
+    num_layers: 5
+    bidirectional: True
+    batch_first: True
+  - _target_: torch.nn.GRU
+    input_size: 8192
+    hidden_size: 4096
+    num_layers: 5
+    bidirectional: True
+    batch_first: True
+  - _target_: torch.nn.GRU
+    input_size: 8192
+    hidden_size: 4096
+    num_layers: 5
+    bidirectional: True
+    batch_first: True
+activation: torch.nn.ReLU()
