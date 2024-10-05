@@ -35,8 +35,10 @@ class RNNBlock(nn.Module):
         self.rnn_layers = nn.ModuleList(self.rnn_layers)
         self.bn_layers = nn.ModuleList(self.bn_layers)
         self.activations = nn.ModuleList(self.activations)
-        self.device = device
-
+        if device == "auto":
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        else:
+            self.device = device
     def forward(self, specs):
         hidden_state = torch.zeros(
             self.rnn_layers[0].num_layers * (2 if self.rnn_layers[0].bidirectional else 1),
