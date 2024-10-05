@@ -44,6 +44,7 @@ def main(config):
     model = instantiate(config.model, n_tokens=len(text_encoder)).to(device)
     logger.info(model)
     logger.info(f'Model parameters number: {sum(p.numel() for p in model.parameters())}')
+    logger.info(f'{[p.device for p in model.parameters()]}')
 
     # get function handles of loss and metrics
     loss_function = instantiate(config.loss_function).to(device)
