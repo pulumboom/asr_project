@@ -90,7 +90,7 @@ class CTCTextEncoder:
                     new_prefix = prefix
                 else:
                     new_prefix += cur_char
-                new_dp[(new_prefix, cur_char)] = np.log(np.exp(new_dp[(new_prefix, cur_char)]) + np.exp(v + log_prob))
+                new_dp[(new_prefix, cur_char)] = np.log(np.exp(new_dp[(new_prefix, cur_char)]) + np.exp(v + next_token_prob))
         return new_dp
 
     def _truncate_paths(self, dp, beam_size):
