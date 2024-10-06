@@ -68,7 +68,7 @@ class DeepSpeechV2(nn.Module):
         self.fc = nn.Linear(rnn_layers[-1].hidden_size * (2 if rnn_layers[-1].bidirectional else 1), n_tokens)
 
     def forward(self, **batch):
-        specs = batch["spectrogram"].unsqueeze(1).transpose(-1, -2)
+        specs = batch["spectrogram"].unsqueeze(1)
         specs = self.cnn_layers(specs)
         specs = specs.view(specs.shape[0], -1, specs.shape[-1]).transpose(-1, -2)
         specs = self.rnn_layers(specs)

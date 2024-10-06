@@ -71,6 +71,7 @@ class CTCTextEncoder:
         return ''.join(decoded)
 
     def ctc_beam_search(self, log_probs, beam_size=20):
+        assert log_probs.shape[-1] == len(self.ind2char), "Mismatch in vocab_size and log_probs size"
         dp = {
             ("", self.EMPTY_TOK): 0.0
         }

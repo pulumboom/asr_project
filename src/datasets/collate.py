@@ -19,11 +19,16 @@ def collate_fn(dataset_items: list[dict]):
 
     result_batch = {}
     for key in dataset_items[0].keys():
-        if key == "text_encoded" or key == "spectrogram":
+        if key == "text_encoded":
             result_batch[key] = pad_sequence(
                 [elem[key].T for elem in dataset_items],
                 batch_first=True
             ).squeeze()
+        elif key == "spectrogram":
+            result_batch[key] = pad_sequence(
+                [elem[key].T for elem in dataset_items],
+                batch_first=True
+            ).squeeze().transpose(-1, -2)
         elif isinstance(dataset_items[0][key], torch.Tensor):
             result_batch[key] = pad_sequence(
                 [elem[key].T for elem in dataset_items],
