@@ -4,7 +4,7 @@ defaults:
   - metrics: deepspeech_idiot_beam_search_testing
   - datasets: example
   - dataloader: example
-  - transforms: example_only_instance
+  - transforms: log_melspectrogram
   - _self_
 optimizer:
   _target_: torch.optim.AdamW
