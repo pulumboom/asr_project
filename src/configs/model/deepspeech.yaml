@@ -25,41 +25,41 @@ rnn_layers:
     num_layers: 5
     bidirectional: True
     batch_first: True
-  - _target_: torch.nn.GRU
-    input_size: 460
-    hidden_size: 230
-    num_layers: 5
-    bidirectional: True
-    batch_first: True
-  - _target_: torch.nn.GRU
-    input_size: 460
-    hidden_size: 230
-    num_layers: 5
-    bidirectional: True
-    batch_first: True
-  - _target_: torch.nn.GRU
-    input_size: 460
-    hidden_size: 230
-    num_layers: 5
-    bidirectional: True
-    batch_first: True
-  - _target_: torch.nn.GRU
-    input_size: 460
-    hidden_size: 230
-    num_layers: 5
-    bidirectional: True
-    batch_first: True
-  - _target_: torch.nn.GRU
-    input_size: 460
-    hidden_size: 230
-    num_layers: 5
-    bidirectional: True
-    batch_first: True
-  - _target_: torch.nn.GRU
-    input_size: 460
-    hidden_size: 230
-    num_layers: 5
-    bidirectional: True
-    batch_first: True
+#  - _target_: torch.nn.GRU
+#    input_size: 460
+#    hidden_size: 230
+#    num_layers: 5
+#    bidirectional: True
+#    batch_first: True
+#  - _target_: torch.nn.GRU
+#    input_size: 460
+#    hidden_size: 230
+#    num_layers: 5
+#    bidirectional: True
+#    batch_first: True
+#  - _target_: torch.nn.GRU
+#    input_size: 460
+#    hidden_size: 230
+#    num_layers: 5
+#    bidirectional: True
+#    batch_first: True
+#  - _target_: torch.nn.GRU
+#    input_size: 460
+#    hidden_size: 230
+#    num_layers: 5
+#    bidirectional: True
+#    batch_first: True
+#  - _target_: torch.nn.GRU
+#    input_size: 460
+#    hidden_size: 230
+#    num_layers: 5
+#    bidirectional: True
+#    batch_first: True
+#  - _target_: torch.nn.GRU
+#    input_size: 460
+#    hidden_size: 230
+#    num_layers: 5
+#    bidirectional: True
+#    batch_first: True
 activation: torch.nn.ReLU()
 device: auto
