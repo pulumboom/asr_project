@@ -73,29 +73,33 @@ class CTCTextEncoder:
     def ctc_beam_search(self, log_probs, beam_size=20):
         assert log_probs.shape[-1] == len(self.ind2char), "Mismatch in vocab_size and log_probs size"
         dp = {
-            ("", self.EMPTY_TOK): 0.0
+            ("", self.EMPTY_TOK): 1.0
         }
         for log_prob in log_probs:
-            log_prob = log_prob.cpu().detach().numpy()
-            dp = self._expand_and_merge_path(dp, log_prob)
+            prob = np.exp(log_prob.cpu().detach().numpy())
+            dp = self._expand_and_merge_path(dp, prob)
             dp = self._truncate_paths(dp, beam_size)
-        max_prob_prefix = max(dp.items(), key=lambda x: x[1])[0]
+        max_prob_prefix = max(dp.items(), key=lambda x: x[1])[0][0]
         return max_prob_prefix
 
-    def _expand_and_merge_path(self, dp, log_prob):
+    def _expand_and_merge_path(self, dp, prob):
         new_dp = defaultdict(float)
-        for ind, next_token_prob in enumerate(log_prob):
+        for ind, next_token_prob in enumerate(prob):
             cur_char = self.ind2char[ind]
-            for (prefix, last_char), v in dp.items():
-                if last_char == cur_char or cur_char == self.EMPTY_TOK:
-                    new_prefix = prefix
-                else:
-                    new_prefix += cur_char
-                new_dp[(new_prefix, cur_char)] = np.log(np.exp(new_dp[(new_prefix, cur_char)]) + np.exp(v + next_token_prob))
+            for (prefix, last_char), prefix_prob in dp.items():
+                new_prefix = prefix
+                if last_char != cur_char and cur_char != self.EMPTY_TOK:
+                    new_prefix = prefix + cur_char
+                new_dp[(new_prefix, cur_char)] += prefix_prob * next_token_prob
         return new_dp
 
     def _truncate_paths(self, dp, beam_size):
-        return dict(sorted(list(dp.items()), key=lambda x: -x[1])[:beam_size])
+        truncated_dp = dict(sorted(list(dp.items()), key=lambda x: -x[1])[:beam_size])
+        total_prob = sum(truncated_dp.values())
+        if total_prob > 0:
+            for key in truncated_dp.keys():
+                truncated_dp[key] /= total_prob
+        return truncated_dp
 
     @staticmethod
     def normalize_text(text: str):
