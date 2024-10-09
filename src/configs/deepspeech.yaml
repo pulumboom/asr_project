@@ -8,11 +8,10 @@ defaults:
   - _self_
 optimizer:
   _target_: torch.optim.SGD
-  lr: 1e-3
-  momentum: 0.9
+  lr: 1e-2
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.ExponentialLR
-  gamma: 0.83
+  gamma: 0.7
 loss_function:
   _target_: src.loss.CTCLossWrapper
 text_encoder:
