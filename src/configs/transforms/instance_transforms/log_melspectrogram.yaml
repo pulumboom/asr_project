@@ -6,11 +6,11 @@ train:
     _target_: torchvision.transforms.v2.Compose
     transforms:
       - _target_: src.transforms.wav_augs.Gain
-  spectrogram:
-    _target_: torchaudio.transforms.AmplitudeToDB
+#  spectrogram:
+#    _target_: torchaudio.transforms.AmplitudeToDB
 inference:
   get_spectrogram:
     _target_: torchaudio.transforms.MelSpectrogram
     sample_rate: 16000
-  spectrogram:
-    _target_: torchaudio.transforms.AmplitudeToDB
+#  spectrogram:
+#    _target_: torchaudio.transforms.AmplitudeToDB
