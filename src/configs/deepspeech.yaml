@@ -8,7 +8,7 @@ defaults:
   - _self_
 optimizer:
   _target_: torch.optim.SGD
-  lr: 6e-4
+  lr: 1e-3
   momentum: 0.9
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.ExponentialLR
