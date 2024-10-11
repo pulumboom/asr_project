@@ -103,11 +103,13 @@ class Trainer(BaseTrainer):
         ]
         argmax_texts_raw = [self.text_encoder.decode(inds) for inds in argmax_inds]
         argmax_texts = [self.text_encoder.ctc_decode(inds) for inds in argmax_inds]
-        beam_search_texts = [self.text_encoder.ctc_beam_search(log_prob) for log_prob in log_probs]
-        tuples = list(zip(argmax_texts, text, argmax_texts_raw, audio_path, beam_search_texts))
+        # beam_search_texts = [self.text_encoder.ctc_beam_search(log_prob) for log_prob in log_probs]
+        # tuples = list(zip(argmax_texts, text, argmax_texts_raw, audio_path, beam_search_texts))
+        tuples = list(zip(argmax_texts, text, argmax_texts_raw, audio_path))
 
         rows = {}
-        for pred, target, raw_pred, audio_path, beam_search_pred in tuples[:examples_to_log]:
+        # for pred, target, raw_pred, audio_path, beam_search_pred in tuples[:examples_to_log]:
+        for pred, target, raw_pred, audio_path in tuples[:examples_to_log]:
             target = self.text_encoder.normalize_text(target)
             wer = calc_wer(target, pred) * 100
             cer = calc_cer(target, pred) * 100
@@ -118,7 +120,7 @@ class Trainer(BaseTrainer):
                 "predictions": pred,
                 "wer": wer,
                 "cer": cer,
-                "beam search predictions": beam_search_pred
+                # "beam search predictions": beam_search_pred
             }
         self.writer.add_table(
             "predictions", pd.DataFrame.from_dict(rows, orient="index")
