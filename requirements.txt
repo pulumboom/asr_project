@@ -20,3 +20,4 @@ pillow~=10.4.0
 editdistance~=0.8.1
 
 wget
+datasets

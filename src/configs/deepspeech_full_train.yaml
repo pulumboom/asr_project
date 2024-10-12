@@ -1,17 +1,17 @@
 defaults:
   - model: deepspeech
   - writer: wandb
-  - metrics: example
-  - datasets: full_clean
-  - dataloader: example
+  - metrics: add_train_metrics
+  - datasets: full_train
+  - dataloader: shuffled
   - transforms: log_melspectrogram
   - _self_
 optimizer:
   _target_: torch.optim.AdamW
-  lr: 3e-4
+  lr: 5e-4
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.StepLR
-  step_size: 400
+  step_size: 800
   gamma: 0.9
 loss_function:
   _target_: src.loss.CTCLossWrapper
@@ -19,7 +19,7 @@ text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
 trainer:
   log_step: 50
-  n_epochs: 40
+  n_epochs: 60
   epoch_len: 200
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
