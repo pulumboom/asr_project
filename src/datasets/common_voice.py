@@ -19,6 +19,7 @@ class CommonVoiceDataset(BaseDataset):
             "en",
             cache_dir=self._data_dir,
             split=split,
+            trust_remote_code=True
         )
         index = self._get_or_load_index(split)
         super().__init__(index, *args, **kwargs)

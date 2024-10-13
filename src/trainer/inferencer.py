@@ -1,5 +1,6 @@
 import torch
 from tqdm.auto import tqdm
+from pathlib import Path
 
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
@@ -21,7 +22,7 @@ class Inferencer(BaseTrainer):
         device,
         dataloaders,
         text_encoder,
-        save_path,
+        save_path=None,
         metrics=None,
         batch_transforms=None,
         skip_model_load=False,
@@ -136,26 +137,17 @@ class Inferencer(BaseTrainer):
         # Some saving logic. This is an example
         # Use if you need to save predictions on disk
 
-        batch_size = batch["logits"].shape[0]
-        current_id = batch_idx * batch_size
+        batch_size = batch["spectrogram"].shape[0]
 
         for i in range(batch_size):
-            # clone because of
-            # https://github.com/pytorch/pytorch/issues/1995
-            logits = batch["logits"][i].clone()
-            label = batch["labels"][i].clone()
-            pred_label = logits.argmax(dim=-1)
-
-            output_id = current_id + i
-
-            output = {
-                "pred_label": pred_label,
-                "label": label,
-            }
+            pred_text = self.text_encoder.ctc_beam_search(batch['log_probs'][i])
 
             if self.save_path is not None:
-                # you can use safetensors or other lib here
-                torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+                self.save_path = Path(self.save_path)
+                self.save_path.mkdir(exist_ok=True, parents=True)
+                utterance_id = batch['audio_path'][i].split('/')[-1].split('.')[0] + '.txt'
+                with (self.save_path / utterance_id).open('w') as f:
+                    f.write(pred_text + '\n')
 
         return batch
 

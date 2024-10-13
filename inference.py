@@ -49,8 +49,10 @@ def main(config):
         )
 
     # save_path for model predictions
-    save_path = ROOT_PATH / "data" / "saved" / config.inferencer.save_path
-    save_path.mkdir(exist_ok=True, parents=True)
+    save_path = None
+    if config.inferencer.save_path:
+        save_path = ROOT_PATH / "data" / "saved" / config.inferencer.save_path
+        save_path.mkdir(exist_ok=True, parents=True)
 
     inferencer = Inferencer(
         model=model,

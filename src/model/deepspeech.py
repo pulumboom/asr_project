@@ -40,11 +40,12 @@ class RNNBlock(nn.Module):
         else:
             self.device = device
     def forward(self, specs):
-        hidden_state = torch.zeros(
-            self.rnn_layers[0].num_layers * (2 if self.rnn_layers[0].bidirectional else 1),
-            specs.shape[0],
-            self.rnn_layers[0].hidden_size,
-        ).to(self.device)
+        # hidden_state = torch.zeros(
+        #     self.rnn_layers[0].num_layers * (2 if self.rnn_layers[0].bidirectional else 1),
+        #     specs.shape[0],
+        #     self.rnn_layers[0].hidden_size,
+        # ).to(self.device)
+        hidden_state = None
         for i in range(len(self.rnn_layers)):
             specs, hidden_state = self.rnn_layers[i](specs, hidden_state)
             specs = self.bn_layers[i](specs.transpose(-1, -2)).transpose(-1, -2)

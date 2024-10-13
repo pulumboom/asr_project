@@ -1,0 +1,30 @@
+train:
+  get_spectrogram: # special key for getting spectrogram
+    _target_: torchaudio.transforms.MelSpectrogram
+    sample_rate: 16000
+  audio: # name of the tensor on which we apply transform
+    _target_: torchvision.transforms.v2.Compose
+    transforms:
+      - _target_: src.transforms.wav_augs.Gain
+      - _target_: src.transforms.wav_augs.PolarityInversion
+        p: 0.1
+  spectrogram:
+    _target_: torchvision.transforms.v2.Compose
+    transforms:
+      - _target_: torchaudio.transforms.AmplitudeToDB
+      - _target_: torchvision.transforms.v2.RandomApply
+        transforms:
+          - _target_: torchaudio.transforms.TimeMasking
+            time_mask_param: 20
+        p: 0.1
+      - _target_: torchvision.transforms.v2.RandomApply
+        transforms:
+          - _target_: torchaudio.transforms.FrequencyMasking
+            freq_mask_param: 10
+        p: 0.1
+inference:
+  get_spectrogram:
+    _target_: torchaudio.transforms.MelSpectrogram
+    sample_rate: 16000
+  spectrogram:
+    _target_: torchaudio.transforms.AmplitudeToDB

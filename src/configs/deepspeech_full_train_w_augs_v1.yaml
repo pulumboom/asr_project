@@ -4,30 +4,30 @@ defaults:
   - metrics: add_train_metrics
   - datasets: full_train
   - dataloader: shuffled
-  - transforms: log_melspectrogram
+  - transforms: log_melspectrogram_w_augs_v1
   - _self_
 optimizer:
   _target_: torch.optim.AdamW
-  lr: 5e-4
+  lr: 1e-5
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.StepLR
   step_size: 800
-  gamma: 0.9
+  gamma: 0.0
 loss_function:
   _target_: src.loss.CTCLossWrapper
 text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
 trainer:
   log_step: 50
-  n_epochs: 90
+  n_epochs: 50
   epoch_len: 200
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
-  from_pretrained: ckp/full_clean/model_best.pth
+  from_pretrained: ckp/full_train_w_augs/model_best.pth
   device: auto # device name or "auto"
   override: True # if True, will override the previous run with the same name
-  monitor: "min test_WER_(Argmax)" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
-  save_period: 5 # checkpoint each save_period epochs in addition to the best epoch
+  monitor: "min val_WER_(Argmax)" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
+  save_period: 100 # checkpoint each save_period epochs in addition to the best epoch
   early_stop: ${trainer.n_epochs} # epochs for early stopping
   save_dir: "saved"
   seed: 55

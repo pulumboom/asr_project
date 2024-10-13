@@ -21,3 +21,5 @@ editdistance~=0.8.1
 
 wget
 datasets
+sentencepiece
+flashlight-text

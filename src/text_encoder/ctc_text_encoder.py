@@ -1,9 +1,13 @@
 import re
 from string import ascii_lowercase
+import sentencepiece as spm
 from collections import defaultdict
 
 import torch
 import numpy as np
+
+from torchaudio.models.decoder import ctc_decoder, download_pretrained_files
+import torch.nn.functional as F
 
 # TODO add BPE, LM, Beam Search support
 # Note: think about metrics and encoder
@@ -14,12 +18,26 @@ import numpy as np
 class CTCTextEncoder:
     EMPTY_TOK = ""
 
-    def __init__(self, alphabet=None, **kwargs):
+    def __init__(self, alphabet=None, bpe_model_file=None, lm_model=None, beam_size=50, lm_weight=2, **kwargs):
         """
         Args:
             alphabet (list): alphabet for language. If None, it will be
                 set to ascii
         """
+        self.bpe_tokenizer = None
+        if bpe_model_file:
+            self.bpe_tokenizer = spm.SentencePieceProcessor(model_file=bpe_model_file)
+
+        self.lm_decoder = None
+        if lm_model:
+            files = download_pretrained_files("librispeech-4-gram")
+            self.lm_decoder = ctc_decoder(
+                lexicon=files.lexicon,
+                tokens=['-'] + list(ascii_lowercase) + ['|', "'"],
+                lm=files.lm,
+                beam_size=beam_size,
+                lm_weight=lm_weight,
+            )
 
         if alphabet is None:
             alphabet = list(ascii_lowercase + " ")
@@ -31,15 +49,21 @@ class CTCTextEncoder:
         self.char2ind = {v: k for k, v in self.ind2char.items()}
 
     def __len__(self):
+        if self.bpe_tokenizer:
+            return self.bpe_tokenizer.vocab_size()
         return len(self.vocab)
 
     def __getitem__(self, item: int):
         assert type(item) is int
+        if self.bpe_tokenizer is not None:
+            return self.bpe_tokenizer.decode(item)
         return self.ind2char[item]
 
     def encode(self, text) -> torch.Tensor:
         text = self.normalize_text(text)
         try:
+            if self.bpe_tokenizer:
+                return torch.Tensor(self.bpe_tokenizer.encode(text)).unsqueeze(0)
             return torch.Tensor([self.char2ind[char] for char in text]).unsqueeze(0)
         except KeyError:
             unknown_chars = set([char for char in text if char not in self.char2ind])
@@ -57,21 +81,34 @@ class CTCTextEncoder:
         Returns:
             raw_text (str): raw text with empty tokens and repetitions.
         """
+        if self.bpe_tokenizer:
+            "".join(self.bpe_tokenizer.decode(inds)).strip()
         return "".join([self.ind2char[int(ind)] for ind in inds]).strip()
 
     def ctc_decode(self, inds) -> str:
         decoded = []
         last_char = self.EMPTY_TOK
         for ind in inds:
-            if self.ind2char[ind] == last_char:
+            if self.bpe_tokenizer:
+                decoded_char = self.bpe_tokenizer.decode(ind)
+            else:
+                decoded_char = self.ind2char[ind]
+
+            if decoded_char == last_char:
                 continue
-            if self.ind2char[ind] != self.EMPTY_TOK:
-                decoded.append(self.ind2char[ind])
-            last_char = self.ind2char[ind]
+            if decoded_char != self.EMPTY_TOK:
+                decoded.append(decoded_char)
+            last_char = decoded_char
         return ''.join(decoded)
 
-    def ctc_beam_search(self, log_probs, beam_size=20):
-        assert log_probs.shape[-1] == len(self.ind2char), "Mismatch in vocab_size and log_probs size"
+    def ctc_beam_search_lm(self, log_probs):
+        log_probs_padded = F.pad(log_probs, (0, 1), mode='constant', value=-torch.inf)
+        if self.lm_decoder:
+            return ''.join(self.lm_decoder(log_probs_padded)[0][0].words)
+        return ''
+
+    def ctc_beam_search(self, log_probs, beam_size=100):
+        # assert log_probs.shape[-1] == len(self.ind2char), "Mismatch in vocab_size and log_probs size"
         dp = {
             ("", self.EMPTY_TOK): 1.0
         }
